@@ -1,10 +1,3 @@
-type ActionSuccess<T> = {
-  ok: true;
-  code: "SUCCESS";
-  data: T;
-  error?: undefined;
-};
-
 type ActionNoOp = {
   ok: false;
   code: "NO_OP";
@@ -17,6 +10,13 @@ type ActionNotReady = {
   code: "NOT_READY";
   data?: undefined;
   error: string;
+};
+
+type ActionSuccess<T> = {
+  ok: true;
+  code: "SUCCESS";
+  data: T;
+  error?: undefined;
 };
 
 type ActionBadInput = {
