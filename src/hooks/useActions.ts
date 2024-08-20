@@ -1,10 +1,10 @@
 import * as Comlink from "comlink";
-import { Signer } from "../remote/Signer.js";
-import { AsyncState } from "../remote/AsyncState.js";
-import { Message } from "../remote/Message.js";
+import { Signer } from "../types/Signer.js";
+import { AsyncState } from "../types/AsyncState.js";
+import { Message } from "../types/Message.js";
 import { useMemo } from "react";
-import { Actions } from "../remote/Actions.js";
-import XmtpRemote from "../remote/worker.js?worker&inline";
+import { Actions } from "../types/Actions.js";
+import XmtpRemote from "../actions/worker.js?worker&inline";
 
 const REMOTES: Record<string, Actions | undefined> = {};
 

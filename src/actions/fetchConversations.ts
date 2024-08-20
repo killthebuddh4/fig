@@ -1,4 +1,4 @@
-import { store } from "../state/store.js";
+import { store } from "./store.js";
 
 export const fetchConversations = async () => {
   const client = store.getState().client;
@@ -18,7 +18,7 @@ export const fetchConversations = async () => {
       code: "SUCCESS",
       data: conversations,
     };
-  } catch (error) {
+  } catch {
     return {
       ok: false,
       code: "WORKER_ERROR",

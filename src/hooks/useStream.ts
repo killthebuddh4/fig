@@ -1,8 +1,8 @@
 import { useMemo, useEffect } from "react";
-import { Signer } from "../remote/Signer.js";
+import { Signer } from "../types/Signer.js";
 import { useActions } from "./useActions.js";
-import { Message } from "../remote/Message.js";
-import { AsyncState } from "../remote/AsyncState.js";
+import { Message } from "../types/Message.js";
+import { AsyncState } from "../types/AsyncState.js";
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
 
@@ -12,7 +12,7 @@ const useStreamStore = create<{
   stream: null,
 }));
 
-export const useStream = ({ wallet }: { wallet?: Signer; opts?: {} }) => {
+export const useStream = ({ wallet }: { wallet?: Signer; opts?: object }) => {
   const {
     listenToGlobalMessageStream,
     ignoreGlobalMessageStream,

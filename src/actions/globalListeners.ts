@@ -1,5 +1,3 @@
-import { v4 as uuid } from "uuid";
-
 const listeners = new Map<string, { ignore: () => void }>();
 
 export const add = (id: string, listener: () => void) => {

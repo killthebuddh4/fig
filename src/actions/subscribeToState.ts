@@ -1,7 +1,7 @@
-import { ActionResult } from "../ActionResult.js";
-import { store } from "../state/store.js";
+import { ActionResult } from "../types/ActionResult.js";
+import { store } from "./store.js";
 import { v4 as uuidv4 } from "uuid";
-import { AsyncState } from "../AsyncState.js";
+import { AsyncState } from "../types/AsyncState.js";
 
 export const subscribeToState = async (args: {
   onChange: (s: {

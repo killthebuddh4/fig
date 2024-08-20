@@ -1,5 +1,5 @@
-import { ActionResult } from "../ActionResult.js";
-import { store } from "../state/store.js";
+import { ActionResult } from "../types/ActionResult.js";
+import { store } from "./store.js";
 
 export const stopClient = async (): Promise<ActionResult<undefined>> => {
   console.log("ACTION :: stopClient :: CALLED");

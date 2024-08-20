@@ -1,5 +1,5 @@
 import { SortDirection, Conversation } from "@xmtp/xmtp-js";
-import { store } from "../state/store.js";
+import { store } from "./store.js";
 
 export const fetchMessages = async (
   conversation: {

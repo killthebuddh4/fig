@@ -1,7 +1,7 @@
 import { Conversation } from "@xmtp/xmtp-js";
-import { store } from "../state/store.js";
-import { ActionResult } from "../ActionResult.js";
-import { Message } from "../Message.js";
+import { store } from "./store.js";
+import { ActionResult } from "../types/ActionResult.js";
+import { Message } from "../types/Message.js";
 
 export const sendMessage = async (args: {
   conversation: {
