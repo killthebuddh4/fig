@@ -1,4 +1,4 @@
-import { Signer } from "./Signer.js";
+import { Signer } from "./Signer.ts";
 
 export type StartClientOpts = {
   wallet: Signer;

@@ -1,13 +1,29 @@
 import * as Comlink from "comlink";
-import { startClient } from "./startClient.js";
-import { stopClient } from "./stopClient.js";
-import { fetchState } from "./fetchState.js";
-import { startGlobalMessageStream } from "./startGlobalMessageStream.js";
-import { listenToGlobalMessageStream } from "./listenToGlobalMessageStream.js";
-import { sendMessage } from "./sendMessage.js";
-import { subscribeToState } from "./subscribeToState.js";
-import { ignoreGlobalMessageStream } from "./ignoreGlobalMessageStream.js";
-import { stopGlobalMessageStream } from "./stopGlobalMessageStream.js";
+import { startClient } from "./startClient.ts";
+import { stopClient } from "./stopClient.ts";
+import { fetchState } from "./fetchState.ts";
+import { startGlobalMessageStream } from "./startGlobalMessageStream.ts";
+import { listenToGlobalMessageStream } from "./listenToGlobalMessageStream.ts";
+import { sendMessage } from "./sendMessage.ts";
+import { subscribeToState } from "./subscribeToState.ts";
+import { ignoreGlobalMessageStream } from "./ignoreGlobalMessageStream.ts";
+import { stopGlobalMessageStream } from "./stopGlobalMessageStream.ts";
+
+console.log("WORKER LOADED");
+console.log("WORKER LOADED");
+console.log("WORKER LOADED");
+console.log("WORKER LOADED");
+console.log("WORKER LOADED");
+console.log("WORKER LOADED");
+console.log("WORKER LOADED");
+console.log("WORKER LOADED");
+console.log("WORKER LOADED");
+console.log("WORKER LOADED");
+console.log("WORKER LOADED");
+console.log("WORKER LOADED");
+console.log("WORKER LOADED");
+console.log("WORKER LOADED");
+console.log("WORKER LOADED");
 
 Comlink.expose({
   startClient,

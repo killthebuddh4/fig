@@ -1,5 +1,5 @@
-import { ActionResult } from "../types/ActionResult.js";
-import { remove } from "./globalListeners.js";
+import { ActionResult } from "../types/ActionResult.ts";
+import { remove } from "./globalListeners.ts";
 
 export const ignoreGlobalMessageStream = async (
   listenerId: string

@@ -1,8 +1,8 @@
 import { useMemo, useEffect } from "react";
-import { Signer } from "../types/Signer.js";
-import { useActions } from "./useActions.js";
-import { Message } from "../types/Message.js";
-import { AsyncState } from "../types/AsyncState.js";
+import { Signer } from "../types/Signer.ts";
+import { useActions } from "./useActions.ts";
+import { Message } from "../types/Message.ts";
+import { AsyncState } from "../types/AsyncState.ts";
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
 

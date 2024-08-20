@@ -1,7 +1,7 @@
 import { useMemo, useEffect } from "react";
-import { Signer } from "../types/Signer.js";
-import { useActions } from "./useActions.js";
-import { AsyncState } from "../types/AsyncState.js";
+import { Signer } from "../types/Signer.ts";
+import { useActions } from "./useActions.ts";
+import { AsyncState } from "../types/AsyncState.ts";
 import { create } from "zustand";
 
 const useClientStore = create<{

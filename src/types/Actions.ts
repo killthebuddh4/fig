@@ -1,13 +1,13 @@
-import { startClient } from "../actions/startClient.js";
-import { stopClient } from "../actions/stopClient.js";
-import { fetchState } from "../actions/fetchState.js";
-import { subscribeToState } from "../actions/subscribeToState.js";
-import { unsubscribeToState } from "../actions/unsubscribeToState.js";
-import { startGlobalMessageStream } from "../actions/startGlobalMessageStream.js";
-import { stopGlobalMessageStream } from "../actions/stopGlobalMessageStream.js";
-import { listenToGlobalMessageStream } from "../actions/listenToGlobalMessageStream.js";
-import { ignoreGlobalMessageStream } from "../actions/ignoreGlobalMessageStream.js";
-import { sendMessage } from "../actions/sendMessage.js";
+import { startClient } from "../actions/startClient.ts";
+import { stopClient } from "../actions/stopClient.ts";
+import { fetchState } from "../actions/fetchState.ts";
+import { subscribeToState } from "../actions/subscribeToState.ts";
+import { unsubscribeToState } from "../actions/unsubscribeToState.ts";
+import { startGlobalMessageStream } from "../actions/startGlobalMessageStream.ts";
+import { stopGlobalMessageStream } from "../actions/stopGlobalMessageStream.ts";
+import { listenToGlobalMessageStream } from "../actions/listenToGlobalMessageStream.ts";
+import { ignoreGlobalMessageStream } from "../actions/ignoreGlobalMessageStream.ts";
+import { sendMessage } from "../actions/sendMessage.ts";
 
 export type Actions = {
   startClient: typeof startClient;

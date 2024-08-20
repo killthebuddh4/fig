@@ -1,10 +1,11 @@
 import * as Comlink from "comlink";
-import { Signer } from "../types/Signer.js";
-import { AsyncState } from "../types/AsyncState.js";
-import { Message } from "../types/Message.js";
+import { Signer } from "../types/Signer.ts";
+import { AsyncState } from "../types/AsyncState.ts";
+import { Message } from "../types/Message.ts";
 import { useMemo } from "react";
-import { Actions } from "../types/Actions.js";
-import XmtpRemote from "../actions/worker.js?worker&inline";
+import { Actions } from "../types/Actions.ts";
+// @ts-expect-error Vite and tsc don't play nice.
+import XmtpRemote from "../actions/worker.ts?worker&inline";
 
 const REMOTES: Record<string, Actions | undefined> = {};
 

@@ -1,5 +1,5 @@
-import { store } from "./store.js";
-import { ActionResult } from "../types/ActionResult.js";
+import { store } from "./store.ts";
+import { ActionResult } from "../types/ActionResult.ts";
 
 export const stopGlobalMessageStream = async (): Promise<
   ActionResult<{ stopped: boolean }>

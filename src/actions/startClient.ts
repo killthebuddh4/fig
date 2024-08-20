@@ -1,6 +1,6 @@
-import { store } from "./store.js";
-import { Signer } from "../types/Signer.js";
-import { ActionResult } from "../types/ActionResult.js";
+import { store } from "./store.ts";
+import { Signer } from "../types/Signer.ts";
+import { ActionResult } from "../types/ActionResult.ts";
 import { Client } from "@xmtp/xmtp-js";
 
 export const startClient = async (

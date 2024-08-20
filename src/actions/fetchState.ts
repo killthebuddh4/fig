@@ -1,6 +1,6 @@
-import { ActionResult } from "../types/ActionResult.js";
-import { AsyncState } from "../types/AsyncState.js";
-import { store } from "./store.js";
+import { ActionResult } from "../types/ActionResult.ts";
+import { AsyncState } from "../types/AsyncState.ts";
+import { store } from "./store.ts";
 
 type S = {
   client: AsyncState<undefined>;

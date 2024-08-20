@@ -1,7 +1,7 @@
-import { ActionResult } from "../types/ActionResult.js";
-import { store } from "./store.js";
-import { Message } from "../types/Message.js";
-import { add } from "./globalListeners.js";
+import { ActionResult } from "../types/ActionResult.ts";
+import { store } from "./store.ts";
+import { Message } from "../types/Message.ts";
+import { add } from "./globalListeners.ts";
 
 export const listenToGlobalMessageStream = async (
   id: string,
