@@ -1,6 +1,6 @@
-import { store } from "./store.ts";
-import { Signer } from "../types/Signer.ts";
-import { ActionResult } from "../types/ActionResult.ts";
+import { store } from "./store";
+import { Signer } from "../types/Signer";
+import { ActionResult } from "../types/ActionResult";
 import { Client } from "@xmtp/xmtp-js";
 
 export const startClient = async (
@@ -39,7 +39,7 @@ export const startClient = async (
 
       return {
         ok: false,
-        code: "BAD_INPUT",
+        code: "INPUT_ERROR",
         error: "Wallet is required.",
       };
     } else {

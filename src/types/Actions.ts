@@ -1,13 +1,13 @@
-import { startClient } from "../actions/startClient.ts";
-import { stopClient } from "../actions/stopClient.ts";
-import { fetchState } from "../actions/fetchState.ts";
-import { subscribeToState } from "../actions/subscribeToState.ts";
-import { unsubscribeToState } from "../actions/unsubscribeToState.ts";
-import { startGlobalMessageStream } from "../actions/startGlobalMessageStream.ts";
-import { stopGlobalMessageStream } from "../actions/stopGlobalMessageStream.ts";
-import { listenToGlobalMessageStream } from "../actions/listenToGlobalMessageStream.ts";
-import { ignoreGlobalMessageStream } from "../actions/ignoreGlobalMessageStream.ts";
-import { sendMessage } from "../actions/sendMessage.ts";
+import { startClient } from "../actions/startClient";
+import { stopClient } from "../actions/stopClient";
+import { fetchState } from "../actions/fetchState";
+import { subscribeToState } from "../actions/subscribeToState";
+import { unsubscribeToState } from "../actions/unsubscribeToState";
+import { startGlobalMessageStream } from "../actions/startGlobalMessageStream";
+import { stopGlobalMessageStream } from "../actions/stopGlobalMessageStream";
+import { listenToGlobalMessageStream } from "../actions/listenToGlobalMessageStream";
+import { ignoreGlobalMessageStream } from "../actions/ignoreGlobalMessageStream";
+import { sendMessage } from "../actions/sendMessage";
 
 export type Actions = {
   startClient: typeof startClient;

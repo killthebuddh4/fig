@@ -1,12 +1,12 @@
-import { Message } from "./Message.ts";
+import { XmtpMessage } from "./XmtpMessage";
 
 export type QuiverRouterOptions = {
   namespace?: string;
-  onReceivedMessage?: (args: { message: Message }) => void;
-  onSelfSentMessage?: (args: { message: Message }) => void;
-  onTopicMismatch?: (args: { message: Message }) => void;
-  onReceivedInvalidJson?: (args: { message: Message }) => void;
-  onReceivedInvalidRequest?: (args: { message: Message }) => void;
+  onReceivedMessage?: (args: { message: XmtpMessage }) => void;
+  onSelfSentMessage?: (args: { message: XmtpMessage }) => void;
+  onTopicMismatch?: (args: { message: XmtpMessage }) => void;
+  onReceivedInvalidJson?: (args: { message: XmtpMessage }) => void;
+  onReceivedInvalidRequest?: (args: { message: XmtpMessage }) => void;
   onUnknownFunction?: () => void;
   onAuthError?: (args: { error: unknown }) => void;
   onUnauthorized?: () => void;
@@ -15,6 +15,6 @@ export type QuiverRouterOptions = {
   onHandlerError?: (args: { error: unknown }) => void;
   onOutputSerializationError?: () => void;
   onSendingResponse?: () => void;
-  onSentResponse?: ({ sent }: { sent: Message }) => void;
+  onSentResponse?: ({ sent }: { sent: XmtpMessage }) => void;
   onSendResponseError?: () => void;
 };

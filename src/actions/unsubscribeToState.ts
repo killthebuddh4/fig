@@ -1,5 +1,5 @@
-import { ActionResult } from "../types/ActionResult.ts";
-import { store } from "./store.ts";
+import { ActionResult } from "../types/ActionResult";
+import { store } from "./store";
 
 export const unsubscribeToState = async (args: {
   subscriptionId: string;

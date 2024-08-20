@@ -1,20 +1,23 @@
-import { Message } from "./Message.ts";
-import { Conversation } from "./Conversation.ts";
+import { XmtpMessage } from "./XmtpMessage";
+import { XmtpConversation } from "./XmtpConversation";
 
 export type QuiverClientOptions = {
   timeoutMs?: number;
   onRequestTimeout?: () => void;
-  onSelfSentMessage?: (args: { message: Message }) => void;
-  onUnknownSender?: (args: { message: Message }) => void;
-  onTopicMismatch?: (args: { message: Message }) => void;
-  onReceivedInvalidJson?: (args: { message: Message }) => void;
-  onReceivedInvalidResponse?: (args: { message: Message }) => void;
-  onOutputTypeMismatch?: (args: { message: Message }) => void;
-  onInvalidPayload?: (args: { message: Message }) => void;
-  onIdMismatch?: (args: { message: Message }) => void;
+  onSelfSentMessage?: (args: { message: XmtpMessage }) => void;
+  onUnknownSender?: (args: { message: XmtpMessage }) => void;
+  onTopicMismatch?: (args: { message: XmtpMessage }) => void;
+  onReceivedInvalidJson?: (args: { message: XmtpMessage }) => void;
+  onReceivedInvalidResponse?: (args: { message: XmtpMessage }) => void;
+  onOutputTypeMismatch?: (args: { message: XmtpMessage }) => void;
+  onInvalidPayload?: (args: { message: XmtpMessage }) => void;
+  onIdMismatch?: (args: { message: XmtpMessage }) => void;
   onResponseHandlerError?: (args: { error: unknown }) => void;
   onInputSerializationError?: () => void;
-  onSendingRequest?: (args: { topic: Conversation; content: string }) => void;
-  onSentRequest?: (args: { message: Message }) => void;
+  onSendingRequest?: (args: {
+    topic: XmtpConversation;
+    content: string;
+  }) => void;
+  onSentRequest?: (args: { message: XmtpMessage }) => void;
   onSendRequestError?: (args: { error: unknown }) => void;
 };

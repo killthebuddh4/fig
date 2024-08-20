@@ -1,11 +1,11 @@
-import { ActionResult } from "../types/ActionResult.ts";
-import { store } from "./store.ts";
-import { Message } from "../types/Message.ts";
-import { add } from "./globalListeners.ts";
+import { ActionResult } from "../types/ActionResult";
+import { store } from "./store";
+import { XmtpMessage } from "../types/XmtpMessage";
+import { add } from "./globalListeners";
 
 export const listenToGlobalMessageStream = async (
   id: string,
-  handler: (m: Message) => void
+  handler: (m: XmtpMessage) => void
 ): Promise<ActionResult<{ listenerId: string }>> => {
   console.log("ACTION :: listenToGlobalMessageStream :: CALLED");
 

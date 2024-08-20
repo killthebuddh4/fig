@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { QuiverFunction } from "../types/QuiverFunction.ts";
-import { QuiverAuth } from "../types/QuiverAuth.ts";
-import { QuiverHandler } from "../types/QuiverHandler.ts";
+import { QuiverFunction } from "../types/QuiverFunction";
+import { QuiverAuth } from "../types/QuiverAuth";
+import { QuiverHandler } from "../types/QuiverHandler";
 
 export const createFunction = <I = undefined, O = undefined>(args: {
   input?: z.ZodType<I>;

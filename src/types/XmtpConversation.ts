@@ -1,7 +1,7 @@
-export type Conversation = {
+export type XmtpConversation = {
   peerAddress: string;
   context?: {
     conversationId: string;
-    metadata: {};
+    metadata: Record<string, unknown>;
   };
 };

@@ -1,4 +1,4 @@
-import { store } from "./store.ts";
+import { store } from "./store";
 
 export const fetchPeerOnNetwork = async (args: { peerAddress: string }) => {
   console.log("ACTION :: fetchPeerOnNetwork :: CALLED");

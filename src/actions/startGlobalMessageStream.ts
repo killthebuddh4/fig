@@ -1,6 +1,6 @@
-import { store } from "./store.ts";
-import { createMessageStream } from "../lib/createMesssageStream.ts";
-import { ActionResult } from "../types/ActionResult.ts";
+import { store } from "./store";
+import { createMessageStream } from "../lib/createMesssageStream";
+import { ActionResult } from "../types/ActionResult";
 
 export const startGlobalMessageStream = async (): Promise<
   ActionResult<undefined>

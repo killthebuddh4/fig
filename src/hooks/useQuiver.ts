@@ -1,27 +1,27 @@
 import { z } from "zod";
 import { v4 as uuid } from "uuid";
-import { useActions } from "./useActions.ts";
-import { Signer } from "../types/Signer.ts";
-import { QuiverOptions } from "../types/QuiverOptions.ts";
-import { QuiverClient } from "../types/QuiverClient.ts";
-import { QuiverClientOptions } from "../types/QuiverClientOptions.ts";
-import { QuiverRouterOptions } from "../types/QuiverRouterOptions.ts";
-import { QuiverApiSpec } from "../types/QuiverApiSpec.ts";
-import { QuiverApi } from "../types/QuiverApi.ts";
-import { QuiverResult } from "../types/QuiverResult.ts";
-import { QuiverResponse } from "../types/QuiverResponse.ts";
-import { Start } from "../types/Start.ts";
-import { Message } from "../types/Message.ts";
-import { Subscribe } from "../types/Subscribe.ts";
-import { Publish } from "../types/Publish.ts";
-import { Quiver } from "../types/Quiver.ts";
-import { quiverErrorSchema } from "../lib/quiverErrorSchema.ts";
-import { quiverRequestSchema } from "../lib/quiverRequestSchema.ts";
-import { quiverResponseSchema } from "../lib/quiverResponseSchema.ts";
-import { quiverSuccessSchema } from "../lib/quiverSuccessSchema.ts";
+import { useActions } from "./useActions";
+import { Signer } from "../types/Signer";
+import { QuiverOptions } from "../types/QuiverOptions";
+import { QuiverClient } from "../types/QuiverClient";
+import { QuiverClientOptions } from "../types/QuiverClientOptions";
+import { QuiverRouterOptions } from "../types/QuiverRouterOptions";
+import { QuiverApiSpec } from "../types/QuiverApiSpec";
+import { QuiverApi } from "../types/QuiverApi";
+import { QuiverResult } from "../types/QuiverResult";
+import { QuiverResponse } from "../types/QuiverResponse";
+import { Start } from "../types/Start";
+import { XmtpMessage } from "../types/XmtpMessage";
+import { QuiverSubscribe } from "../types/QuiverSubscribe";
+import { QuiverPublish } from "../types/QuiverPublish";
+import { Quiver } from "../types/Quiver";
+import { quiverErrorSchema } from "../lib/quiverErrorSchema";
+import { quiverRequestSchema } from "../lib/quiverRequestSchema";
+import { quiverResponseSchema } from "../lib/quiverResponseSchema";
+import { quiverSuccessSchema } from "../lib/quiverSuccessSchema";
 
 // TODO This is a stub.
-const handlers = new Map<string, (message: Message) => void>();
+const handlers = new Map<string, (message: XmtpMessage) => void>();
 
 export const useQuiver = (args: {
   wallet: Signer;
@@ -86,7 +86,7 @@ export const useQuiver = (args: {
     });
   };
 
-  const subscribe: Subscribe = ({ handler }) => {
+  const subscribe: QuiverSubscribe = ({ handler }) => {
     const id = uuid();
 
     handlers.set(id, handler);
@@ -98,7 +98,7 @@ export const useQuiver = (args: {
     };
   };
 
-  const publish: Publish = async ({ conversation, content, options }) => {
+  const publish: QuiverPublish = async ({ conversation, content, options }) => {
     const onSendingMessage =
       options?.onSendingMessage || args.options?.onSendingMessage;
     const onSentMessage = options?.onSentMessage || args.options?.onSentMessage;

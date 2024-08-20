@@ -1,29 +1,13 @@
 import * as Comlink from "comlink";
-import { startClient } from "./startClient.ts";
-import { stopClient } from "./stopClient.ts";
-import { fetchState } from "./fetchState.ts";
-import { startGlobalMessageStream } from "./startGlobalMessageStream.ts";
-import { listenToGlobalMessageStream } from "./listenToGlobalMessageStream.ts";
-import { sendMessage } from "./sendMessage.ts";
-import { subscribeToState } from "./subscribeToState.ts";
-import { ignoreGlobalMessageStream } from "./ignoreGlobalMessageStream.ts";
-import { stopGlobalMessageStream } from "./stopGlobalMessageStream.ts";
-
-console.log("WORKER LOADED");
-console.log("WORKER LOADED");
-console.log("WORKER LOADED");
-console.log("WORKER LOADED");
-console.log("WORKER LOADED");
-console.log("WORKER LOADED");
-console.log("WORKER LOADED");
-console.log("WORKER LOADED");
-console.log("WORKER LOADED");
-console.log("WORKER LOADED");
-console.log("WORKER LOADED");
-console.log("WORKER LOADED");
-console.log("WORKER LOADED");
-console.log("WORKER LOADED");
-console.log("WORKER LOADED");
+import { startClient } from "./startClient";
+import { stopClient } from "./stopClient";
+import { fetchState } from "./fetchState";
+import { startGlobalMessageStream } from "./startGlobalMessageStream";
+import { listenToGlobalMessageStream } from "./listenToGlobalMessageStream";
+import { sendMessage } from "./sendMessage";
+import { subscribeToState } from "./subscribeToState";
+import { ignoreGlobalMessageStream } from "./ignoreGlobalMessageStream";
+import { stopGlobalMessageStream } from "./stopGlobalMessageStream";
 
 Comlink.expose({
   startClient,

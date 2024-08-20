@@ -1,6 +1,6 @@
-export * from "./hooks/useStream.ts";
-export * from "./hooks/useQuiver.ts";
-export * from "./hooks/useLogin.ts";
-export * from "./hooks/useActions.ts";
+export * from "./hooks/useStream";
+export * from "./hooks/useQuiver";
+export * from "./hooks/useLogin";
+export * from "./hooks/useActions";
 // TODO, where should this be exported?
-export { createFunction } from "./lib/createFunction.ts";
+export { createFunction } from "./lib/createFunction";

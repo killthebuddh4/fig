@@ -1,4 +1,4 @@
-import { store } from "./store.ts";
+import { store } from "./store";
 
 export const fetchConversations = async () => {
   const client = store.getState().client;

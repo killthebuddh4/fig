@@ -1,17 +1,17 @@
-import { Publish } from "./Publish.ts";
-import { Subscribe } from "./Subscribe.ts";
-import { Start } from "./Start.ts";
-import { QuiverApiSpec } from "./QuiverApiSpec.ts";
-import { QuiverRouterOptions } from "./QuiverRouterOptions.ts";
-import { QuiverClient } from "./QuiverClient.ts";
-import { QuiverApi } from "./QuiverApi.ts";
+import { QuiverPublish } from "./QuiverPublish";
+import { QuiverSubscribe } from "./QuiverSubscribe";
+import { Start } from "./Start";
+import { QuiverApiSpec } from "./QuiverApiSpec";
+import { QuiverRouterOptions } from "./QuiverRouterOptions";
+import { QuiverClient } from "./QuiverClient";
+import { QuiverApi } from "./QuiverApi";
 
 export type Quiver = {
   address: string;
   start: Start;
   stop: () => void;
-  publish: Publish;
-  subscribe: Subscribe;
+  publish: QuiverPublish;
+  subscribe: QuiverSubscribe;
   client: <Api extends QuiverApiSpec>(
     api: Api,
     router: { address: string; namespace?: string },

@@ -1,6 +1,6 @@
 import { ZodType } from "zod";
-import { QuiverAuth } from "./QuiverAuth.ts";
-import { QuiverHandler } from "./QuiverHandler.ts";
+import { QuiverAuth } from "./QuiverAuth";
+import { QuiverHandler } from "./QuiverHandler";
 
 export type QuiverFunction<I, O> = {
   input: ZodType<I>;

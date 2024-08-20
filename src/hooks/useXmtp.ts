@@ -1,30 +1,40 @@
 import { useMemo, useEffect } from "react";
-import { Signer } from "../types/Signer.ts";
-import { useActions } from "./useActions.ts";
-import { Message } from "../types/Message.ts";
-import { AsyncState } from "../types/AsyncState.ts";
+import { Signer } from "../types/Signer";
+import { useActions } from "./useActions";
+import { XmtpMessage } from "../types/XmtpMessage";
+import { AsyncState } from "../types/AsyncState";
+import { Xmtp } from "../types/Xmtp";
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
+import { useXmtpStore } from "./useXmtpStore";
+import { XmtpSubscribe } from "../types/XmtpSubscribe.ts";
 
-const useStreamStore = create<{
-  stream: AsyncState<undefined> | null;
-}>(() => ({
-  stream: null,
-}));
-
-export const useStream = ({ wallet }: { wallet?: Signer; opts?: object }) => {
+export const useXmtp = ({
+  wallet,
+}: {
+  wallet?: Signer;
+  opts?: object;
+}): Xmtp | null => {
   const {
+    startClient,
+    stopClient,
+    fetchState,
     listenToGlobalMessageStream,
     ignoreGlobalMessageStream,
     startGlobalMessageStream,
     stopGlobalMessageStream,
-    fetchState,
     subscribeToState,
     unsubscribeToState,
   } = useActions();
 
-  const stream = useStreamStore((s) => s.stream);
+  const { globalMessageStream, setGlobalMessageStream, client, setClient } =
+    useXmtpStore();
 
+  /*
+   *
+   * SYNC WITH REMOTE STATE
+   *
+   */
   useEffect(() => {
     (async () => {
       if (wallet === undefined) {
@@ -34,10 +44,11 @@ export const useStream = ({ wallet }: { wallet?: Signer; opts?: object }) => {
       const result = await fetchState(wallet);
 
       if (!result.ok) {
+        // TODO: handle error
         return;
       }
 
-      useStreamStore.setState({ stream: result.data.globalMessageStream });
+      setGlobalMessageStream(result.data.globalMessageStream);
     })();
 
     let unsub: (() => void) | undefined;
@@ -50,7 +61,7 @@ export const useStream = ({ wallet }: { wallet?: Signer; opts?: object }) => {
       const result = await subscribeToState({
         wallet,
         onChange: (s) => {
-          useStreamStore.setState({ stream: s.globalMessageStream });
+          setGlobalMessageStream(s.globalMessageStream);
         },
       });
 
@@ -73,9 +84,47 @@ export const useStream = ({ wallet }: { wallet?: Signer; opts?: object }) => {
     return () => {
       unsub?.();
     };
-  }, [wallet, fetchState, subscribeToState, unsubscribeToState]);
+  }, [
+    wallet,
+    fetchState,
+    subscribeToState,
+    unsubscribeToState,
+    setGlobalMessageStream,
+  ]);
 
-  const start = useMemo(() => {
+  const login = useMemo(() => {
+    return async () => {
+      if (wallet === undefined) {
+        throw new Error("useLogin :: wallet is undefined");
+      }
+
+      return startClient({ wallet, opts: {} });
+    };
+  }, [wallet, startClient]);
+
+  const logout = useMemo(() => {
+    return async () => {
+      if (wallet === undefined) {
+        throw new Error("useLogin :: wallet is undefined");
+      }
+
+      return stopClient(wallet);
+    };
+  }, [wallet, stopClient]);
+
+  const isLoggedIn = useMemo(() => {
+    return client?.code === "success";
+  }, [client]);
+
+  const isLoggingIn = useMemo(() => {
+    return client?.code === "pending";
+  }, [client]);
+
+  const isLoginError = useMemo(() => {
+    return client?.code === "error";
+  }, [client]);
+
+  const stream = useMemo(() => {
     return async () => {
       if (wallet === undefined) {
         throw new Error("useStream :: wallet is undefined");
@@ -84,6 +133,18 @@ export const useStream = ({ wallet }: { wallet?: Signer; opts?: object }) => {
       return startGlobalMessageStream(wallet);
     };
   }, [wallet, startGlobalMessageStream]);
+
+  const isStreaming = useMemo(() => {
+    return globalMessageStream?.code === "success";
+  }, [globalMessageStream]);
+
+  const isStarting = useMemo(() => {
+    return globalMessageStream?.code === "pending";
+  }, [globalMessageStream]);
+
+  const isStreamError = useMemo(() => {
+    return globalMessageStream?.code === "error";
+  }, [globalMessageStream]);
 
   const stop = useMemo(() => {
     return async () => {
@@ -95,8 +156,8 @@ export const useStream = ({ wallet }: { wallet?: Signer; opts?: object }) => {
     };
   }, [wallet, stopGlobalMessageStream]);
 
-  const subscribe = useMemo(() => {
-    return (handler: (message: Message) => void) => {
+  const subscribe: XmtpSubscribe = useMemo(() => {
+    return (handler: (message: XmtpMessage) => void) => {
       if (wallet === undefined) {
         throw new Error("useStream :: subscribe :: wallet is undefined");
       }

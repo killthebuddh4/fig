@@ -1,5 +1,5 @@
-import { QuiverSuccess } from "./QuiverSuccess.ts";
-import { QuiverError } from "./QuiverError.ts";
+import { QuiverSuccess } from "./QuiverSuccess";
+import { QuiverError } from "./QuiverError";
 
 export type QuiverResult<D> = {
   request?: string;

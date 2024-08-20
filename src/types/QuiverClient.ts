@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { QuiverSuccess } from "./QuiverSuccess.ts";
-import { QuiverError } from "./QuiverError.ts";
-import { QuiverApiSpec } from "./QuiverApiSpec.ts";
+import { QuiverSuccess } from "./QuiverSuccess";
+import { QuiverError } from "./QuiverError";
+import { QuiverApiSpec } from "./QuiverApiSpec";
 
 export type QuiverClient<A extends QuiverApiSpec> = {
   [K in keyof A]: RemoveSingleUndefinedArgument<

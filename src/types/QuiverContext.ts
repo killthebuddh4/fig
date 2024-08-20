@@ -1,6 +1,6 @@
-import { Message } from "./Message.ts";
+import { XmtpMessage } from "./XmtpMessage";
 
 export type QuiverContext = {
   id: string;
-  message: Message;
+  message: XmtpMessage;
 };

@@ -21,7 +21,7 @@ type ActionSuccess<T> = {
 
 type ActionBadInput = {
   ok: false;
-  code: "BAD_INPUT";
+  code: "INPUT_ERROR";
   data?: undefined;
   error: string;
 };

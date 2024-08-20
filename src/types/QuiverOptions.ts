@@ -1,6 +1,6 @@
 import { Wallet } from "@ethersproject/wallet";
-import { Message } from "./Message.ts";
-import { Conversation } from "./Conversation.ts";
+import { XmtpMessage } from "./XmtpMessage";
+import { XmtpConversation } from "./XmtpConversation";
 
 export type QuiverOptions = {
   wallet?: Wallet;
@@ -13,14 +13,17 @@ export type QuiverOptions = {
   onStartingStream?: () => void;
   onStartedStream?: () => void;
   onStartStreamError?: (error: unknown) => void;
-  onMessageReceived?: (message: Message) => void;
-  onMissedMessage?: (message: Message) => void;
+  onMessageReceived?: (message: XmtpMessage) => void;
+  onMissedMessage?: (message: XmtpMessage) => void;
   onHandlerError?: (error: unknown) => void;
-  onCreatingTopic?: (args: { topic: Conversation }) => void;
-  onCreatedTopic?: (args: { topic: Conversation }) => void;
-  onCreateTopicError?: (args: { topic: Conversation; error: unknown }) => void;
-  onSendingMessage?: (args: { topic: Conversation }) => void;
-  onSentMessage?: (args: { message: Message }) => void;
-  onSendError?: (args: { topic: Conversation }) => void;
+  onCreatingTopic?: (args: { topic: XmtpConversation }) => void;
+  onCreatedTopic?: (args: { topic: XmtpConversation }) => void;
+  onCreateTopicError?: (args: {
+    topic: XmtpConversation;
+    error: unknown;
+  }) => void;
+  onSendingMessage?: (args: { topic: XmtpConversation }) => void;
+  onSentMessage?: (args: { message: XmtpMessage }) => void;
+  onSendError?: (args: { topic: XmtpConversation }) => void;
   onReceivedInvalidJson?: () => void;
 };

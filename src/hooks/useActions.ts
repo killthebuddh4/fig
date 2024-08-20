@@ -1,9 +1,9 @@
 import * as Comlink from "comlink";
-import { Signer } from "../types/Signer.ts";
-import { AsyncState } from "../types/AsyncState.ts";
-import { Message } from "../types/Message.ts";
+import { Signer } from "../types/Signer";
+import { AsyncState } from "../types/AsyncState";
+import { XmtpMessage } from "../types/XmtpMessage";
 import { useMemo } from "react";
-import { Actions } from "../types/Actions.ts";
+import { Actions } from "../types/Actions";
 // @ts-expect-error Vite and tsc don't play nice.
 import XmtpRemote from "../actions/worker.ts?worker&inline";
 
@@ -73,7 +73,7 @@ export const useActions = () => {
     const listenToGlobalMessageStream = async (args: {
       wallet: Signer;
       id: string;
-      handler: (message: Message) => void;
+      handler: (message: XmtpMessage) => void;
     }) => {
       const remote = getRemote({ wallet: args.wallet });
       return remote.listenToGlobalMessageStream(

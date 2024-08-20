@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { Client } from "@xmtp/xmtp-js";
-import { AsyncState } from "../types/AsyncState.ts";
-import { MessageStream } from "../types/MessageStream.ts";
+import { AsyncState } from "../types/AsyncState";
+import { MessageStream } from "../types/MessageStream";
 
 export const store = create<{
   client: AsyncState<Client>;
