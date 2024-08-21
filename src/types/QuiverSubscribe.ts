@@ -1,7 +1,7 @@
-import { XmtpMessage } from "./XmtpMessage";
+import { Message } from "./Message";
 
 export type QuiverSubscribe = (args: {
-  handler: (message: XmtpMessage) => void;
+  handler: (message: Message) => void;
 }) => {
   unsubscribe: () => void;
 };

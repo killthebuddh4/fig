@@ -1,4 +1,4 @@
-export type XmtpConversation = {
+export type Conversation = {
   peerAddress: string;
   context?: {
     conversationId: string;

@@ -1,23 +1,17 @@
 import { useMemo, useEffect } from "react";
-import { Signer } from "../types/Signer";
-import { useActions } from "./useActions";
-import { AsyncState } from "../types/AsyncState";
-import { create } from "zustand";
+import { Signer } from "../../types/Signer";
+import { useActions } from "../useActions";
+import { useStore } from "./useStore";
+import { setAuth } from "./setAuth";
 
-const useClientStore = create<{
-  client: AsyncState<undefined> | null;
-}>(() => ({
-  client: null,
-}));
-
-export const useLogin = ({
+export const useAuth = ({
   wallet,
   opts,
 }: {
   wallet?: Signer;
   opts?: { env?: "production" | "dev" };
 }) => {
-  const client = useClientStore((s) => s.client);
+  const auth = useStore((s) => s.auth);
 
   const {
     startClient,
@@ -39,7 +33,7 @@ export const useLogin = ({
         return;
       }
 
-      useClientStore.setState({ client: result.data.client });
+      setAuth(result.data.client);
     })();
 
     let unsub: (() => void) | undefined;
@@ -48,7 +42,7 @@ export const useLogin = ({
       const result = await subscribeToState({
         wallet,
         onChange: (s) => {
-          useClientStore.setState({ client: s.client });
+          setAuth(s.client);
         },
       });
 
@@ -67,9 +61,9 @@ export const useLogin = ({
     return () => {
       unsub?.();
     };
-  }, [wallet, fetchState, subscribeToState, unsubscribeToState]);
+  }, [wallet, fetchState, subscribeToState, unsubscribeToState, setAuth]);
 
-  const login = useMemo(() => {
+  const signIn = useMemo(() => {
     return async () => {
       if (wallet === undefined) {
         throw new Error("useLogin :: wallet is undefined");
@@ -79,7 +73,7 @@ export const useLogin = ({
     };
   }, [wallet, startClient, opts]);
 
-  const logout = useMemo(() => {
+  const signOut = useMemo(() => {
     return async () => {
       if (wallet === undefined) {
         throw new Error("useLogin :: wallet is undefined");
@@ -90,11 +84,10 @@ export const useLogin = ({
   }, [wallet, stopClient]);
 
   return {
-    login,
-    logout,
-    isReady: client?.code === "idle",
-    isPending: client?.code === "pending",
-    isSuccess: client?.code === "success",
-    isError: client?.code === "error",
+    signIn,
+    signOut,
+    isSignedIn: auth?.code === "success",
+    isSigningIn: auth?.code === "pending",
+    isSignInError: auth?.code === "error",
   };
 };

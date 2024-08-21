@@ -1,50 +1,81 @@
-# React + TypeScript + Vite
+## Overview
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Fig is React hooks for [xmtp](https://xmtp.org). Use Fig to build secure, permissionless, open applications.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Fig provides everything you need to build a complete application on top of XMTP:
 
-## Expanding the ESLint configuration
+- useAuth
+- useMessages
+- useStream
+- useTopic
+- useFunction
+- useRouter
+- useKv (coming soon!)
+- useSql (coming soon!)
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Contents
 
-- Configure the top-level `parserOptions` property like this:
+- [Overview](#overview)
+- [Features](#features)
+- [Contents](#contents)
+- [Quick Start](#quick-start)
+- [API Reference](#api-reference)
+- [Built with Fig](#built-with-fig)
+- [Support](#support)
+- [Community](#community)
+- [Contributing](#contributing)
+- [Sponsors](#sponsors)
+- [Authors](#authors)
+- [License](#license)
+- [Roadmap](#roadmap)
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Quick Start
+
+```bash
+npm install @killthebuddh4/fig
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## API Reference
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+- useAuth
+- useMessages
+- useStream
+- useTopic
+- useFunction
+- useRouter
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+## Built with Fig
+
+- [shh](https://sh.ktb.pub) is private, ephemeral group chat.
+- [txt](https://txt.ktb.pub) is an experimental, text-based, realtime social network
+- More coming soon!
+
+## Support
+
+The best place to get real-time support is the `#fig` channel in [Discord](https://discord.gg/wG9rEmw8) or by sending Achilles a DM on [X](https://x.com/killthebuddha_). Also, please don't hesitate to [open an issue](https://github.com/killthebuddh4/fig/issues/new).
+
+## Community
+
+- Join us on [Discord](https://discord.gg/wG9rEmw8) 💬
+- Follow [Achilles](https://twitter.com/killthebuddh4) on Twitter for project updates 🤝
+
+## Contributing
+
+If you're interested in contributing, please read the [contributing
+docs](/.github/CONTRIBUTING.md) **before submitting a pull request**.
+
+## Sponsors
+
+_You can be the first ❤️!_
+
+## Authors
+
+- [Achilles Schmelzer](https://twitter.com/killthebuddha_)
+
+## License
+
+[MIT](/LICENSE) License
+
+## Roadmap

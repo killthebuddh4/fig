@@ -1,7 +1,7 @@
 import { Conversation } from "@xmtp/xmtp-js";
 import { store } from "./store";
 import { ActionResult } from "../types/ActionResult";
-import { XmtpMessage } from "../types/XmtpMessage";
+import { Message } from "../types/Message";
 
 export const sendMessage = async (args: {
   conversation: {
@@ -14,7 +14,7 @@ export const sendMessage = async (args: {
   opts?: {
     timeoutMs?: number;
   };
-}): Promise<ActionResult<XmtpMessage>> => {
+}): Promise<ActionResult<Message>> => {
   console.log("FIG :: ACTION :: sendMessage :: CALLED");
 
   const timer = setTimeout(() => {
