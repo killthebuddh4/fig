@@ -1,4 +1,4 @@
-export type Start = (args: {
+export type QuiverStart = (args: {
   options?: {
     onCreatingXmtp?: () => void;
     onCreatedXmtp?: () => void;

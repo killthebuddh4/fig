@@ -1,33 +1,31 @@
 import { z } from "zod";
 import { v4 as uuid } from "uuid";
-import { useActions } from "../useActions";
-import { Signer } from "../../types/Signer";
-import { QuiverOptions } from "../../types/QuiverOptions";
-import { QuiverClient } from "../../types/QuiverClient";
-import { QuiverClientOptions } from "../../types/QuiverClientOptions";
-import { QuiverRouterOptions } from "../../types/QuiverRouterOptions";
-import { QuiverApiSpec } from "../../types/QuiverApiSpec";
-import { QuiverApi } from "../../types/QuiverApi";
-import { QuiverResult } from "../../types/QuiverResult";
-import { QuiverResponse } from "../../types/QuiverResponse";
-import { Start } from "../../types/Start";
-import { Message } from "../../types/Message";
-import { QuiverSubscribe } from "../../types/QuiverSubscribe";
-import { QuiverPublish } from "../../types/QuiverPublish";
-import { Quiver } from "../../types/Quiver";
-import { quiverErrorSchema } from "../../lib/quiverErrorSchema";
-import { quiverRequestSchema } from "../../lib/quiverRequestSchema";
-import { quiverResponseSchema } from "../../lib/quiverResponseSchema";
-import { quiverSuccessSchema } from "../../lib/quiverSuccessSchema";
+import { useActions } from "./useActions";
+import { Signer } from "../types/Signer";
+import { QuiverOptions } from "../types/QuiverOptions";
+import { QuiverClient } from "../types/QuiverClient";
+import { QuiverClientOptions } from "../types/QuiverClientOptions";
+import { QuiverRouterOptions } from "../types/QuiverRouterOptions";
+import { QuiverApiSpec } from "../types/QuiverApiSpec";
+import { QuiverApi } from "../types/QuiverApi";
+import { QuiverResult } from "../types/QuiverResult";
+import { QuiverResponse } from "../types/QuiverResponse";
+import { Start } from "../types/Start";
+import { XmtpMessage } from "../types/XmtpMessage";
+import { QuiverSubscribe } from "../types/QuiverSubscribe";
+import { QuiverPublish } from "../types/QuiverPublish";
+import { Quiver } from "../types/Quiver";
+import { quiverErrorSchema } from "../lib/quiverErrorSchema";
+import { quiverRequestSchema } from "../lib/quiverRequestSchema";
+import { quiverResponseSchema } from "../lib/quiverResponseSchema";
+import { quiverSuccessSchema } from "../lib/quiverSuccessSchema";
 
 // TODO This is a stub.
 const handlers = new Map<string, (message: XmtpMessage) => void>();
 
-export const useApi = <Api extends QuiverApiSpec>(args: {
+export const useQuiver = (args: {
   wallet: Signer;
-  api: Api;
-  router: { address: string; namespace: string };
-  options?: QuiverClientOptions;
+  options?: QuiverOptions;
 }): Quiver => {
   const {
     sendMessage,
@@ -37,11 +35,118 @@ export const useApi = <Api extends QuiverApiSpec>(args: {
     stopGlobalMessageStream,
   } = useActions();
 
+  const start: Start = async () => {
+    const startClientResponse = await startClient({
+      wallet: args.wallet,
+      opts: { env: args.options?.env },
+    });
+
+    if (!startClientResponse.ok) {
+      throw new Error(startClientResponse.error);
+    }
+
+    const startStreamResponse = await startGlobalMessageStream(args.wallet);
+
+    if (!startStreamResponse.ok) {
+      throw new Error(startStreamResponse.error);
+    }
+
+    const listenerId = uuid();
+
+    listenToGlobalMessageStream({
+      wallet: args.wallet,
+      id: listenerId,
+      handler: (message) => {
+        try {
+          args.options?.onMessageReceived?.(message);
+        } catch {
+          console.warn("args.options.onMessageReceived threw an error");
+        }
+
+        if (handlers.size === 0) {
+          try {
+            args.options?.onMissedMessage?.(message);
+          } catch {
+            console.warn("onNoHandlersForMessage threw an error");
+          }
+        }
+
+        for (const handler of Array.from(handlers.values())) {
+          try {
+            handler(message);
+          } catch (error) {
+            try {
+              args.options?.onHandlerError?.(error);
+            } catch {
+              console.warn("onHandlerError threw an error");
+            }
+          }
+        }
+      },
+    });
+  };
+
+  const subscribe: QuiverSubscribe = ({ handler }) => {
+    const id = uuid();
+
+    handlers.set(id, handler);
+
+    return {
+      unsubscribe: () => {
+        handlers.delete(id);
+      },
+    };
+  };
+
+  const publish: QuiverPublish = async ({ conversation, content, options }) => {
+    const onSendingMessage =
+      options?.onSendingMessage || args.options?.onSendingMessage;
+    const onSentMessage = options?.onSentMessage || args.options?.onSentMessage;
+    const onSendError = options?.onSendError || args.options?.onSendError;
+
+    onSendingMessage?.({ topic: conversation, content });
+
+    let sent;
+    try {
+      sent = await sendMessage({
+        wallet: args.wallet,
+        conversation,
+        // TODO Make sure this doesn't cause a problem.
+        content: String(content),
+      });
+
+      if (!sent.ok) {
+        throw new Error(sent.error);
+      }
+    } catch (error) {
+      onSendError?.({ topic: conversation, error });
+      throw error;
+    }
+
+    onSentMessage?.({ message: sent.data });
+
+    return { published: sent.data };
+  };
+
+  const stop = async () => {
+    return stopGlobalMessageStream(args.wallet);
+  };
+
+  const client = <Api extends QuiverApiSpec>(
+    api: Api,
+    router: {
+      address: string;
+      namespace?: string;
+    },
+    options?: QuiverClientOptions
+  ) => {
+    const namespace = router.namespace ?? "quiver/0.0.1";
+
     const client = {};
 
-    for (const [key, value] of Object.entries(args.api)) {
+    for (const [key, value] of Object.entries(api)) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (client as any)[key as keyof typeof args.api] = async (
+      (client as any)[key as keyof typeof api] = async (
         input: z.infer<typeof value.input>
       ) => {
         const request = {
@@ -54,7 +159,7 @@ export const useApi = <Api extends QuiverApiSpec>(args: {
         try {
           str = JSON.stringify(request);
         } catch {
-          args.options?.onInputSerializationError?.();
+          options?.onInputSerializationError?.();
 
           return {
             ok: false,
@@ -63,24 +168,45 @@ export const useApi = <Api extends QuiverApiSpec>(args: {
           };
         }
 
-        const resolvers = new Map<string, (value: QuiverResult<any>) => void>();
-
         const promise = new Promise<
           // TODO This type should be something that wraps these types
           // and includes the request and response (and maybe more).
           QuiverResult<z.infer<typeof value.output>>
         >((resolve) => {
-          resolvers.set(request.id, resolve);
-        });
+          const timeout = setTimeout(() => {
+            options?.onRequestTimeout?.();
 
-        const handler = async (message: Message) => {
-          let json;
-          try {
-            json = JSON.parse(String(message.content));
-          } catch {
-            args.options?.onReceivedInvalidJson?.({ message });
-            return;
-          }
+            resolve({
+              ok: false,
+              status: "REQUEST_TIMEOUT",
+            });
+          }, options?.timeoutMs ?? 10000);
+
+          /* TODO, when do we throw and when do we not throw????? */
+          const { unsubscribe } = subscribe({
+            handler: (message) => {
+              if (message.senderAddress === args.wallet.address) {
+                options?.onSelfSentMessage?.({ message });
+                return;
+              }
+
+              if (message.senderAddress !== router.address) {
+                options?.onUnknownSender?.({ message });
+                return;
+              }
+
+              if (message.conversation.context?.conversationId !== namespace) {
+                options?.onTopicMismatch?.({ message });
+                return;
+              }
+
+              let json;
+              try {
+                json = JSON.parse(String(message.content));
+              } catch {
+                options?.onReceivedInvalidJson?.({ message });
+                return;
+              }
 
               let response;
               try {
@@ -137,23 +263,7 @@ export const useApi = <Api extends QuiverApiSpec>(args: {
               });
             },
           });
-
-
-
-
-
-          // const timeout = setTimeout(() => {
-          //   args.options?.onRequestTimeout?.();
-
-          //   resolve({
-          //     ok: false,
-          //     status: "REQUEST_TIMEOUT",
-          //   });
-          // }, options?.timeoutMs ?? 10000);
-
-          /* TODO, when do we throw and when do we not throw????? */
-          const { unsubscribe } = subscribe({
-            handler: (message) => {
+        });
 
         try {
           options?.onSendingRequest?.({

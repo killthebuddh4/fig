@@ -1,73 +1,64 @@
-import { QuiverError } from "../../types/QuiverError";
+import { z } from "zod";
 import { QuiverRouterOptions } from "../../types/QuiverRouterOptions";
-import { Message } from "../../types/Message";
 import { quiverRequestSchema } from "../../lib/quiverRequestSchema";
-import { QuiverPublish } from "../../types/QuiverPublish";
+import { QuiverContext } from "../../types/QuiverContext";
+import { QuiverMiddleware } from "../../types/QuiverMiddleware";
+import { Message } from "../../types/Message";
 import { QuiverApi } from "../../types/QuiverApi";
 
-export const createRouter = (args: {
-  api: QuiverApi;
-  publish: QuiverPublish;
-  options?: QuiverRouterOptions;
-}) => {
-  return async (received: Message) => {
-    args.options?.onReceivedMessage?.({ received });
+export const createRouter = (api: QuiverApi, options?: QuiverRouterOptions) => {
+  const middleware: QuiverMiddleware[] = [];
+
+  const handler = async (received: Message, context: QuiverContext) => {
+    let ctx: QuiverContext = context;
+    for (const mw of middleware) {
+      try {
+        ctx = await mw(ctx);
+      } catch {
+        ctx.throw({
+          ok: false,
+          status: "SERVER_ERROR",
+        });
+
+        return;
+      }
+    }
+
+    options?.onReceivedMessage?.({ received });
 
     let json;
     try {
       json = JSON.parse(String(received.content));
     } catch {
-      args.options?.onReceivedInvalidJson?.({ received });
+      options?.onReceivedInvalidJson?.({ received });
+
+      ctx.throw({
+        ok: false,
+        status: "INPUT_INVALID_JSON",
+      });
       return;
     }
 
-    let request;
+    let request: z.infer<typeof quiverRequestSchema>;
     try {
       request = quiverRequestSchema.parse(json);
     } catch {
-      args.options?.onReceivedInvalidRequest?.({ received });
+      options?.onReceivedInvalidRequest?.({ received });
+
+      ctx.throw({
+        ok: false,
+        status: "INVALID_REQUEST",
+      });
+
       return;
     }
 
-    const sendError = async (err: QuiverError) => {
-      args.options?.onSendingResponse?.({
-        received,
-        content: err,
-      });
+    const fn = api[request.function];
 
-      let content;
-      try {
-        content = JSON.stringify({
-          id: request.id,
-          data: err,
-        });
-      } catch {
-        throw new Error(
-          `Failed to serializer error: ${err}, this should be impossible`
-        );
-      }
+    if (fn === undefined) {
+      options?.onUnknownFunction?.({ received });
 
-      try {
-        const result = await args.publish({
-          conversation: received.conversation,
-          content,
-        });
-
-        args.options?.onSentResponse?.({
-          received,
-          sent: result.published,
-        });
-      } catch (error) {
-        args.options?.onSendResponseError?.({ received, error });
-      }
-    };
-
-    const func = args.api[request.function];
-
-    if (func === undefined) {
-      args.options?.onUnknownFunction?.({ received });
-
-      sendError({
+      ctx.throw({
         ok: false,
         status: "UNKNOWN_FUNCTION",
       });
@@ -75,24 +66,40 @@ export const createRouter = (args: {
       return;
     }
 
+    if (fn.options?.middleware !== undefined) {
+      for (const mw of fn.options.middleware) {
+        try {
+          ctx = await mw(ctx);
+        } catch {
+          ctx.throw({
+            ok: false,
+            status: "SERVER_ERROR",
+          });
+
+          return;
+        }
+      }
+    }
+
     let isAuthorized = false;
 
-    const context = {
-      id: request.id,
-      message: received,
-    };
-
     try {
-      isAuthorized = await func.auth({ context });
-    } catch (error) {
-      args.options?.onAuthError?.({ received, error });
-      isAuthorized = false;
+      isAuthorized = await fn.auth(ctx);
+    } catch {
+      options?.onAuthError?.({ received, error: "AUTH_ERROR" });
+
+      ctx.throw({
+        ok: false,
+        status: "SERVER_ERROR",
+      });
+
+      return;
     }
 
     if (!isAuthorized) {
-      args.options?.onUnauthorized?.({ received });
+      options?.onUnauthorized?.({ received });
 
-      sendError({
+      ctx.throw({
         ok: false,
         status: "UNAUTHORIZED",
       });
@@ -102,11 +109,11 @@ export const createRouter = (args: {
 
     let input;
     try {
-      input = func.input.parse(json.arguments);
+      input = fn.input.parse(json.arguments);
     } catch {
-      args.options?.onInputTypeMismatch?.({ received });
+      options?.onInputTypeMismatch?.({ received });
 
-      sendError({
+      ctx.throw({
         ok: false,
         status: "INPUT_TYPE_MISMATCH",
       });
@@ -114,15 +121,13 @@ export const createRouter = (args: {
       return;
     }
 
-    args.options?.onHandlingInput?.({ received });
-
     let output;
     try {
-      output = await func.handler(input, context);
-    } catch (error) {
-      args.options?.onHandlerError?.({ received, error });
+      output = await fn.handler(input, ctx);
+    } catch {
+      options?.onHandlerError?.({ received, error: "HANDLER_ERROR" });
 
-      sendError({
+      ctx.throw({
         ok: false,
         status: "SERVER_ERROR",
       });
@@ -130,47 +135,23 @@ export const createRouter = (args: {
       return;
     }
 
-    const res = {
+    if (fn.options?.isNotification) {
+      return;
+    }
+
+    ctx.return({
       ok: true,
       status: "SUCCESS",
       data: output,
-    };
-
-    let content;
-    try {
-      content = JSON.stringify(res);
-    } catch {
-      args.options?.onOutputSerializationError?.({ received });
-
-      sendError({
-        ok: false,
-        status: "OUTPUT_SERIALIZATION_FAILED",
-      });
-
-      return;
-    }
-
-    args.options?.onSendingResponse?.({
-      received,
-      content,
     });
+  };
 
-    try {
-      const result = await args.publish({
-        conversation: received.conversation,
-        content,
-      });
+  const wrap = (mw: QuiverMiddleware) => {
+    middleware.push(mw);
+  };
 
-      args.options?.onSentResponse?.({
-        received,
-        sent: result.published,
-      });
-
-      return;
-    } catch (error) {
-      args.options?.onSendResponseError?.({ received, error });
-
-      return;
-    }
+  return {
+    wrap,
+    handler,
   };
 };

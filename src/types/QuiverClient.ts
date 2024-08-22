@@ -1,13 +1,12 @@
 import { z } from "zod";
-import { QuiverSuccess } from "./QuiverSuccess";
-import { QuiverError } from "./QuiverError";
 import { QuiverApiSpec } from "./QuiverApiSpec";
+import { QuiverResult } from "./QuiverResult";
 
 export type QuiverClient<A extends QuiverApiSpec> = {
   [K in keyof A]: RemoveSingleUndefinedArgument<
     (
       i: z.infer<A[K]["input"]>
-    ) => Promise<QuiverSuccess<z.infer<A[K]["output"]>> | QuiverError>
+    ) => Promise<QuiverResult<z.infer<A[K]["output"]>>>
   >;
 };
 

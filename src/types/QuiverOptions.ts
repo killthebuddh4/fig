@@ -1,26 +1,13 @@
-import { Wallet } from "@ethersproject/wallet";
 import { Message } from "./Message";
-import { Conversation } from "./Conversation";
 
 export type QuiverOptions = {
-  wallet?: Wallet;
-  env?: "dev" | "production";
-  onAlreadyCreated?: () => void;
-  onCreateWalletError?: (error: unknown) => void;
-  onCreatingXmtp?: () => void;
-  onCreatedXmtp?: () => void;
-  onCreateXmtpError?: (error: unknown) => void;
-  onStartingStream?: () => void;
-  onStartedStream?: () => void;
-  onStartStreamError?: (error: unknown) => void;
-  onMessageReceived?: (message: Message) => void;
-  onMissedMessage?: (message: Message) => void;
-  onHandlerError?: (error: unknown) => void;
-  onCreatingTopic?: (args: { topic: Conversation }) => void;
-  onCreatedTopic?: (args: { topic: Conversation }) => void;
-  onCreateTopicError?: (args: { topic: Conversation; error: unknown }) => void;
-  onSendingMessage?: (args: { topic: Conversation }) => void;
-  onSentMessage?: (args: { message: Message }) => void;
-  onSendError?: (args: { topic: Conversation }) => void;
-  onReceivedInvalidJson?: () => void;
+  onReceivedMessage?: (message: Message) => void;
+  onSkippedMessage?: (message: Message) => void;
+  onRoutedMessage?: (message: Message) => void;
+  onFoundRouter?: (message: Message) => void;
+  onReturn?: (message: Message) => void;
+  onThrow?: (message: Message) => void;
+  onSending?: (message: Message) => void;
+  onSent?: (message: Message, sent: Message) => void;
+  onSendError?: (message: Message, error: unknown) => void;
 };
