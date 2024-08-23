@@ -12,6 +12,7 @@ import { quiverRequestSchema } from "./quiverRequestSchema";
 import { quiverSuccessSchema } from "./quiverSuccessSchema";
 import { quiverErrorSchema } from "./quiverErrorSchema";
 import { createThrow } from "./createThrow";
+import { parseRequest } from "./parseRequest";
 
 const QUIVER = "quiver";
 const VERSION = "0.0.1";
