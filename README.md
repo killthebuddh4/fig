@@ -30,6 +30,7 @@ Fig provides everything you need to build a complete application on top of XMTP:
 - [Authors](#authors)
 - [License](#license)
 - [Roadmap](#roadmap)
+- [Notes](#notes)
 
 ## Quick Start
 
@@ -79,3 +80,39 @@ _You can be the first ❤️!_
 [MIT](/LICENSE) License
 
 ## Roadmap
+
+## Notes
+
+Quiver API
+
+```JavaScript
+
+const quiver = createQuiver();
+
+quiver.use();
+
+const routerA = createRouter();
+
+routerA.use();
+
+routerA.use();
+
+const routerB = createRouter();
+
+routerB.use();
+
+quiver.router(a);
+
+quiver.router(b);
+
+quiver.start();
+
+// later
+us to talk to Quiver through (and about) specific router instances.
+
+router.detach();
+
+router.attach();
+
+
+```
