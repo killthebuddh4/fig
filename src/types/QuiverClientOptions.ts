@@ -1,7 +1,9 @@
 import { Message } from "./Message";
 import { Conversation } from "./Conversation";
+import { Fig } from "./Fig";
 
 export type QuiverClientOptions = {
+  fig?: Fig;
   timeoutMs?: number;
   onRequestTimeout?: () => void;
   onSelfSentMessage?: (args: { message: Message }) => void;

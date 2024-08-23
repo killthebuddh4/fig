@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const quiverErrorSchema = z.object({
+  id: z.string(),
   ok: z.literal(false),
   status: z.union([
     z.literal("INPUT_SERIALIZATION_FAILED"),

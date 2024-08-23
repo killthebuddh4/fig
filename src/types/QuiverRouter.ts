@@ -1,7 +1,8 @@
-import { Message } from "./Message";
 import { QuiverContext } from "./QuiverContext";
+import { QuiverApi } from "./QuiverApi";
 
 export type QuiverRouter = {
-  handler: (message: Message, context: QuiverContext) => Promise<unknown>;
-  wrap: (message: Message, context: QuiverContext) => Promise<QuiverContext>;
+  api: QuiverApi;
+  handler: (context: QuiverContext) => Promise<unknown>;
+  wrap: (context: QuiverContext) => Promise<QuiverContext>;
 };

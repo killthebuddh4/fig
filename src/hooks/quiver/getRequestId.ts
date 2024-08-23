@@ -1,4 +1,4 @@
-import { Message } from "../types/Message";
+import { Message } from "../../types/Message";
 import { quiverRequestSchema } from "./quiverRequestSchema";
 
 export const getRequestId = (message: Message): string => {

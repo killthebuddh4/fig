@@ -1,12 +1,27 @@
 import { z } from "zod";
 import { QuiverApiSpec } from "./QuiverApiSpec";
-import { QuiverResult } from "./QuiverResult";
+import { QuiverContext } from "./QuiverContext";
+import { QuiverMiddleware } from "./QuiverMiddleware";
+import { QuiverError } from "./QuiverError";
+import { QuiverSuccess } from "./QuiverSuccess";
 
 export type QuiverClient<A extends QuiverApiSpec> = {
-  [K in keyof A]: RemoveSingleUndefinedArgument<
+  client: QuiverClientApi<A>;
+  router: {
+    address: string;
+    namespace: string;
+  };
+  wrap: (mw: QuiverMiddleware) => void;
+  handler: (context: QuiverContext) => Promise<void>;
+};
+
+export type QuiverClientApi<A extends QuiverApiSpec> = {
+  [K in keyof A["functions"]]: RemoveSingleUndefinedArgument<
     (
-      i: z.infer<A[K]["input"]>
-    ) => Promise<QuiverResult<z.infer<A[K]["output"]>>>
+      i: z.infer<A["functions"][K]["input"]>
+    ) => Promise<
+      QuiverSuccess<z.infer<A["functions"][K]["output"]>> | QuiverError
+    >
   >;
 };
 

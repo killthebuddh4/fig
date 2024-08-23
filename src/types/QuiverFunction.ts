@@ -1,12 +1,12 @@
 import { ZodType } from "zod";
 import { QuiverAuth } from "./QuiverAuth";
-import { QuiverHandler } from "./QuiverHandler";
 import { QuiverFunctionOptions } from "./QuiverFunctionOptions";
+import { QuiverContext } from "./QuiverContext";
 
 export type QuiverFunction<I, O> = {
   input: ZodType<I>;
   output: ZodType<O>;
   auth: QuiverAuth;
-  handler: QuiverHandler<I, O>;
-  options?: QuiverFunctionOptions;
+  handler: (input: I, context: QuiverContext) => Promise<O>;
+  options?: QuiverFunctionOptions<I, O>;
 };

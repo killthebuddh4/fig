@@ -1,8 +1,18 @@
 import { QuiverRouter } from "./QuiverRouter";
 import { QuiverClient } from "./QuiverClient";
+import { QuiverApiSpec } from "./QuiverApiSpec";
 
 export type Quiver = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  client: () => QuiverClient<any>;
-  router: (namespace: string, router: QuiverRouter) => void;
+  start: () => void;
+  stop: () => void;
+  attach: {
+    client: <Api extends QuiverApiSpec>(
+      client: QuiverClient<Api>
+    ) => {
+      detach: () => void;
+    };
+    router: (router: QuiverRouter) => {
+      detach: () => void;
+    };
+  };
 };

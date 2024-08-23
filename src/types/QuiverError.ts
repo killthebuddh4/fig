@@ -1,4 +1,5 @@
 export type QuiverError = {
+  id: string;
   ok: false;
   status:
     | "INPUT_SERIALIZATION_FAILED"
@@ -15,4 +16,5 @@ export type QuiverError = {
     | "UNAUTHORIZED"
     | "REQUEST_TIMEOUT"
     | "SERVER_ERROR";
+  data?: undefined;
 };

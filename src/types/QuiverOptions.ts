@@ -1,13 +1,13 @@
-import { Message } from "./Message";
+import { QuiverMiddleware } from "./QuiverMiddleware";
+import { Signer } from "./Signer";
+import { Fig } from "./Fig";
+import type { Client } from "@xmtp/xmtp-js";
 
 export type QuiverOptions = {
-  onReceivedMessage?: (message: Message) => void;
-  onSkippedMessage?: (message: Message) => void;
-  onRoutedMessage?: (message: Message) => void;
-  onFoundRouter?: (message: Message) => void;
-  onReturn?: (message: Message) => void;
-  onThrow?: (message: Message) => void;
-  onSending?: (message: Message) => void;
-  onSent?: (message: Message, sent: Message) => void;
-  onSendError?: (message: Message, error: unknown) => void;
+  key?: string;
+  signer?: Signer;
+  xmtp?: Client;
+  fig?: Fig;
+  env?: "production" | "dev";
+  middleware?: QuiverMiddleware[];
 };

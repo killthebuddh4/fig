@@ -1,134 +1,173 @@
-import { Message } from "../../types/Message";
-import { Quiver } from "../../types/Quiver";
+import { z } from "zod";
 import { QuiverRouter } from "../../types/QuiverRouter";
-import { Conversation } from "../../types/Conversation";
-import { QuiverContext } from "../../types/QuiverContext";
-import { QuiverError } from "../../types/QuiverError";
 import { QuiverOptions } from "../../types/QuiverOptions";
-import { getRequestId } from "../../lib/getRequestId";
-import { QuiverSuccess } from "../../types/QuiverSuccess";
+import { QuiverApiSpec } from "../../types/QuiverApiSpec";
+import { QuiverClient } from "../../types/QuiverClient";
+import { Quiver } from "../../types/Quiver";
+import { v4 as uuid } from "uuid";
+import { QuiverContext } from "../../types/QuiverContext";
+import { Message } from "../../types/Message";
+import { createReturn } from "./createReturn";
+import { quiverRequestSchema } from "./quiverRequestSchema";
+import { quiverSuccessSchema } from "./quiverSuccessSchema";
+import { quiverErrorSchema } from "./quiverErrorSchema";
+import { createThrow } from "./createThrow";
 
-export const createQuiver = (args: {
-  subscribe: (handler: (message: Message) => void) => void;
-  publish: (conversation: Conversation, content: unknown) => Promise<Message>;
-  options?: QuiverOptions;
-}): Quiver => {
+const QUIVER = "quiver";
+const VERSION = "0.0.1";
+const ROUTER = "router";
+const CLIENT = "client";
+const ADDRESS = "TODO";
+
+export const createQuiver = (options?: QuiverOptions): Quiver => {
+  const fig = options?.fig;
+
+  if (fig === undefined) {
+    throw new Error("fig is required, others aren't implemented yet");
+  }
+
+  const start = () => {
+    fig.start();
+  };
+
+  const stop = () => {
+    fig.stop();
+  };
+
   const routers = new Map<string, QuiverRouter>();
+  const clients = new Map<string, QuiverClient<QuiverApiSpec>>();
 
-  const createReturn = (message: Message) => {
-    return async (res: QuiverSuccess<unknown>) => {
-      args.options?.onReturn?.(message);
-      args.options?.onSending?.(message);
-
-      try {
-        const id = getRequestId(message);
-
-        if (id === null) {
-          // this "should be impossible" if we call this function correctly
-          throw new Error(
-            `Failed to parse request id from message ${message.id}`
-          );
-        }
-
-        let content;
-        try {
-          content = JSON.stringify({
-            id,
-            data: res,
-          });
-        } catch {
-          throw new Error(
-            `Failed to serialize return response for message ${message.id}`
-          );
-        }
-
-        const sent = await args.publish(message.conversation, content);
-
-        args.options?.onSent?.(message, sent);
-      } catch (err) {
-        args?.options?.onSendError?.(message, err);
-      }
-    };
-  };
-
-  const createThrow = (message: Message) => {
-    return async (res: QuiverError) => {
-      args.options?.onThrow?.(message);
-      args.options?.onSending?.(message);
-
-      try {
-        const id = getRequestId(message);
-
-        if (id === null) {
-          // this "should be impossible" if we call this function correctly
-          throw new Error(
-            `Failed to parse request id from message ${message.id}`
-          );
-        }
-
-        let content;
-        try {
-          content = JSON.stringify({
-            id,
-            data: res,
-          });
-        } catch {
-          throw new Error(
-            `Failed to serialize return response for message ${message.id}`
-          );
-        }
-
-        const sent = await args.publish(message.conversation, content);
-
-        args.options?.onSent?.(message, sent);
-      } catch (err) {
-        args?.options?.onSendError?.(message, err);
-      }
-    };
-  };
-
-  const attach = (namespace: string, router: QuiverRouter) => {
-    const existing = routers.get(namespace);
-
-    if (existing !== undefined) {
-      throw new Error(`Router with namespace ${namespace} already exists`);
-    }
-
-    routers.set(namespace, router);
-
-    return () => {
-      routers.delete(namespace);
-    };
-  };
-
-  // TODO, how do we handle startup and teardown
-  args.subscribe((message: Message) => {
-    const namespace = message.conversation.context?.conversationId;
-
-    if (namespace === undefined) {
+  // 1. check if it's a quiver message
+  // 2. check if it's from a client or a router
+  // 3. if it's from a client, find the router and call the handler
+  // 4. if it's from a router, find the client and call the handler
+  // TODO HOW DO I MANAGE THE SUBSCRIPTIONS?
+  fig.subscribe((message: Message) => {
+    if (message.conversation.context === undefined) {
       return;
     }
 
-    const router = routers.get(namespace);
+    const cid = message.conversation.context.conversationId;
 
-    if (router === undefined) {
+    if (!cid.startsWith(`${QUIVER}/${VERSION}`)) {
       return;
     }
 
-    const context: QuiverContext = {
-      message,
-      throw: createThrow(message),
-      return: createReturn(message),
-    };
+    if (cid.startsWith(`${QUIVER}/${VERSION}/${CLIENT}`)) {
+      const router = Array.from(routers.values()).find((router) => {
+        return cid.startsWith(
+          `${QUIVER}/${VERSION}/${CLIENT}/${ADDRESS}/${router.namespace}`
+        );
+      });
 
-    router.handler(message, context);
+      if (router === undefined) {
+        throw new Error("ERROR HANDLER NOT YET IMPLEMENTED");
+      }
+
+      let json;
+      try {
+        json = JSON.parse(String(message.content));
+      } catch {
+        // TODO How do we handle errors where we can't figure out the request ID?
+
+        return;
+      }
+
+      let request: z.infer<typeof quiverRequestSchema>;
+      try {
+        request = quiverRequestSchema.parse(json);
+      } catch {
+        // TODO How do we handle errors where we can't figure out the request ID?
+
+        return;
+      }
+
+      const context: QuiverContext = {
+        return: createReturn(message, fig.publish),
+        throw: createThrow(message, fig.publish),
+        message,
+        metadata: { request },
+      };
+
+      router.handler(context);
+
+      return;
+    }
+
+    if (cid.startsWith(`${QUIVER}/${VERSION}/${ROUTER}`)) {
+      const client = Array.from(clients.values()).find((client) => {
+        return cid.startsWith(
+          `${QUIVER}/${VERSION}/${ROUTER}/${client.router.address}/${client.router.namespace}`
+        );
+      });
+
+      if (client === undefined) {
+        throw new Error("ERROR HANDLER NOT YET IMPLEMENTED");
+      }
+
+      let json;
+      try {
+        json = JSON.parse(String(message.content));
+      } catch {
+        // TODO How do we handle errors where we can't figure out the request ID?
+
+        return;
+      }
+
+      const s = z.union([quiverSuccessSchema, quiverErrorSchema]);
+
+      let response: z.infer<typeof s>;
+      try {
+        response = s.parse(json);
+      } catch {
+        // TODO How do we handle errors where we can't figure out the request ID?
+        return;
+      }
+
+      const context: QuiverContext = {
+        return: createReturn(message, fig.publish),
+        throw: createThrow(message, fig.publish),
+        message,
+        metadata: { response },
+      };
+
+      client.handler(context);
+
+      return;
+    }
+
+    throw new Error("ERROR HANDLER NOT YET IMPLEMENTED");
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const client = {} as unknown as any;
+  const attach = {
+    client: <Api extends QuiverApiSpec>(client: QuiverClient<Api>) => {
+      const id = uuid();
+
+      clients.set(id, client);
+
+      return {
+        detach: () => {
+          clients.delete(id);
+        },
+      };
+    },
+
+    router: (router: QuiverRouter) => {
+      const id = uuid();
+
+      routers.set(id, router);
+
+      return {
+        detach: () => {
+          routers.delete(id);
+        },
+      };
+    },
+  };
 
   return {
-    client,
-    router: attach,
+    start,
+    stop,
+    attach,
   };
 };

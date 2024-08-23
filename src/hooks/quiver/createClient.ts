@@ -1,123 +1,97 @@
 import { z } from "zod";
 import { v4 as uuid } from "uuid";
-import { useActions } from "../useActions";
-import { Signer } from "../../types/Signer";
-import { QuiverOptions } from "../../types/QuiverOptions";
 import { QuiverClient } from "../../types/QuiverClient";
 import { QuiverClientOptions } from "../../types/QuiverClientOptions";
-import { QuiverRouterOptions } from "../../types/QuiverRouterOptions";
 import { QuiverApiSpec } from "../../types/QuiverApiSpec";
-import { QuiverApi } from "../../types/QuiverApi";
-import { QuiverResult } from "../../types/QuiverResult";
-import { QuiverResponse } from "../../types/QuiverResponse";
-import { QuiverStart } from "../../types/QuiverStart.ts";
-import { Message } from "../../types/Message";
-import { QuiverSubscribe } from "../../types/QuiverSubscribe";
 import { QuiverRequest } from "../../types/QuiverRequest";
-import { QuiverPublish } from "../../types/QuiverPublish";
-import { Quiver } from "../../types/Quiver";
-import { quiverErrorSchema } from "../../lib/quiverErrorSchema";
-import { quiverRequestSchema } from "../../lib/quiverRequestSchema";
-import { quiverResponseSchema } from "../../lib/quiverResponseSchema";
-import { quiverSuccessSchema } from "../../lib/quiverSuccessSchema";
-import { QuiverError } from "../../types/QuiverError.ts";
+import { QuiverContext } from "../../types/QuiverContext";
+import { QuiverResponse } from "../../types/QuiverResponse";
+import { QuiverMiddleware } from "../../types/QuiverMiddleware";
 
-// TODO This is a stub.
+export const createClient = <Api extends QuiverApiSpec>(
+  api: Api,
+  router: {
+    address: string;
+    namespace: string;
+  },
+  options?: QuiverClientOptions
+): QuiverClient<Api> => {
+  const fig = options?.fig;
 
-export const createClient = <Api extends QuiverApiSpec>(args: {
-  api: Api;
-  router: { address: string; namespace: string };
-  publish: QuiverPublish;
-  options?: QuiverClientOptions;
-}): QuiverClient<Api> => {
-  const createResponseHandler = <O>(
-    request: QuiverRequest,
-    outputSchema: z.ZodType<O>,
-    resolver: (value: QuiverResult<O>) => void
-  ) => {
-    return async (response: QuiverResponse) => {
-      const error = quiverErrorSchema.safeParse(response.data);
+  if (fig === undefined) {
+    throw new Error("fig is required, others aren't implemented yet");
+  }
 
-      if (error.success) {
-        resolver({
-          ok: error.data.ok,
-          status: error.data.status,
-          request: JSON.stringify(request, null, 2),
-          response: JSON.stringify(response.data, null, 2),
-        });
+  const middleware: QuiverMiddleware[] = [];
+
+  const requests = new Map<
+    string,
+    {
+      request: QuiverRequest;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      resolve: (value: QuiverResponse<any>) => void;
+    }
+  >();
+
+  const handler = async (context: QuiverContext) => {
+    let ctx: QuiverContext = context;
+    for (const mw of middleware) {
+      try {
+        ctx = await mw(ctx);
+      } catch {
+        throw new Error("ERROR HANDLER NOT YET IMPLEMENTED");
       }
+    }
 
-      const success = quiverSuccessSchema.safeParse(response.data);
+    const response = context.metadata?.response as QuiverResponse<unknown>;
 
-      if (!success.success) {
-        resolver({
-          ok: false,
-          status: "INVALID_RESPONSE",
-          request: JSON.stringify(request, null, 2),
-          response: JSON.stringify(response.data, null, 2),
-        });
-      }
+    if (response === undefined) {
+      throw new Error("ERROR HANDLER NOT YET IMPLEMENTED");
+    }
 
-      const output = outputSchema.safeParse(success.data?.data);
+    const request = requests.get(response.id);
 
-      if (!output.success) {
-        resolver({
-          ok: false,
-          status: "OUTPUT_TYPE_MISMATCH",
-          request: JSON.stringify(request, null, 2),
-          response: JSON.stringify(response.data, null, 2),
-        });
-      }
+    if (request === undefined) {
+      throw new Error("ERROR HANDLER NOT YET IMPLEMENTED");
+    }
 
-      resolver({
-        ok: true,
-        status: "SUCCESS",
-        data: output.data,
-      });
-    };
+    if (!response.ok) {
+      request.resolve(response);
+
+      return;
+    }
+
+    if (request === undefined) {
+      throw new Error("ERROR HANDLER NOT YET IMPLEMENTED");
+    }
+
+    const func = api.functions[request.request.function];
+
+    if (func === undefined) {
+      throw new Error("ERROR HANDLER NOT YET IMPLEMENTED");
+    }
+
+    const result = func.output.safeParse(response.data);
+
+    if (!result.success) {
+      throw new Error("ERROR HANDLER NOT YET IMPLEMENTED");
+    }
+
+    request.resolve(response as QuiverResponse<z.infer<typeof func.output>>);
+
+    return;
   };
 
-  const client = {};
+  const client = {} as QuiverClient<typeof api>["client"];
 
-  for (const [key, value] of Object.entries(args.api)) {
+  for (const name of Object.keys(api.functions)) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (client as any)[key as keyof typeof args.api] = async (
-      input: z.infer<typeof value.input>
+    (client as any)[name] = async (
+      input: z.infer<(typeof api.functions)[typeof name]["input"]>
     ) => {
-      const handlers = new Map<string, (message: Message) => void>();
-
-      const router = async (message: Message) => {
-        let json;
-        try {
-          json = JSON.parse(String(message.content));
-        } catch {
-          args.options?.onReceivedInvalidJson?.({ message });
-          return;
-        }
-
-        let response;
-        try {
-          response = quiverResponseSchema.parse(json);
-        } catch {
-          args.options?.onReceivedInvalidResponse?.({ message });
-          return;
-        }
-
-        const id = response.id;
-
-        const handler = handlers.get(id);
-
-        if (handler === undefined) {
-          // TODO This should be an error.
-          return;
-        }
-
-        handler(message);
-      };
-
       const request = {
         id: uuid(),
-        function: key,
+        function: name,
         arguments: input,
       };
 
@@ -125,7 +99,7 @@ export const createClient = <Api extends QuiverApiSpec>(args: {
       try {
         str = JSON.stringify(request);
       } catch {
-        args.options?.onInputSerializationError?.();
+        options?.onInputSerializationError?.();
 
         return {
           ok: false,
@@ -134,48 +108,40 @@ export const createClient = <Api extends QuiverApiSpec>(args: {
         };
       }
 
-      let resolver: (value: QuiverResult<any>) => void;
-
       const promise = new Promise<
         // TODO This type should be something that wraps these types
         // and includes the request and response (and maybe more).
-        QuiverResult<z.infer<typeof value.output>>
+        QuiverResponse<z.infer<(typeof api.functions)[typeof name]["output"]>>
       >((resolve) => {
-        resolver = resolve;
+        requests.set(request.id, { request, resolve });
       });
 
-      const responseHandler = createResponseHandler(
-        request,
-        value.output,
-        resolver
-      );
-
       try {
-        args.options?.onSendingRequest?.({
+        options?.onSendingRequest?.({
           topic: {
-            peerAddress: args.router.address,
+            peerAddress: api.address,
             context: {
-              conversationId: args.router.namespace,
+              conversationId: api.namespace,
               metadata: {},
             },
           },
           content: str,
         });
 
-        const sent = await args.publish({
+        const sent = await fig.publish({
           conversation: {
-            peerAddress: args.router.address,
+            peerAddress: api.address,
             context: {
-              conversationId: args.router.namespace,
+              conversationId: api.namespace,
               metadata: {},
             },
           },
           content: str,
         });
 
-        args.options?.onSentRequest?.({ message: sent.published });
+        options?.onSentRequest?.({ message: sent.published });
       } catch (error) {
-        args.options?.onSendRequestError?.({ error });
+        options?.onSendRequestError?.({ error });
 
         return {
           ok: false,
@@ -188,5 +154,14 @@ export const createClient = <Api extends QuiverApiSpec>(args: {
     };
   }
 
-  return client as QuiverClient<typeof args.api>;
+  const wrap = (mw: QuiverMiddleware) => {
+    middleware.push(mw);
+  };
+
+  return {
+    client,
+    router,
+    wrap,
+    handler,
+  };
 };

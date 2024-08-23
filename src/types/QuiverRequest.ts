@@ -1,5 +1,4 @@
-export type QuiverRequest = {
-  id: string;
-  function: string;
-  arguments: unknown;
-};
+import { z } from "zod";
+import { quiverRequestSchema } from "../hooks/quiver/quiverRequestSchema";
+
+export type QuiverRequest = z.infer<typeof quiverRequestSchema>;
